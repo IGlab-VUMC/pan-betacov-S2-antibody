@@ -1,5 +1,5 @@
 # pan-betacov-S2-antibody
-# Repo for "Discovery and Characterization of a Pan-betacoronavirus S2-binding antibody" (link).
+# Repo for "Discovery and Characterization of a Pan-betacoronavirus S2-binding antibody" 54043-5 (link).
 
 Nicole V. Johnson*, Steven C. Wall*, Kevin J. Kramer*, Clinton M. Holt, Sivakumar Periasamy, Simone Richardson, Naveenchandra Suryadevara, Emanuele Andreano, Ida Paciello, Giulio Pierleoni, Giulia Piccini, Ying Huang, Pan Ge1, James D. Allen, Naoko Uno, Andrea Shiakolas, Kelsey Pilewski, Rachel Nargi, Rachel Sutton, Alexandria A. Abu-Shmais, Robert Parks, Barton Haynes, Robert Carnahan, James Crowe, Rino Rappuoli, Alexander Bukreyev, Ted Ross, Giuseppe Sautto#, Jason McLellan#, Ivelin Georgiev#
 
