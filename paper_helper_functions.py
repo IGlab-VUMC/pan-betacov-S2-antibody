@@ -393,26 +393,37 @@ def make_structs_for_bsa_analysis(pdb_id, ag_ch, ab_ch, i):
         ab_ch -- (str) Example: "A+B+C+D" or "A"
     """
     from pymol import cmd
-    os.chdir(r"C:\Users\clint\Box\IG Lab\Members\Clint Holt\Corona\54043-5\pdbs\other_ab-ag_complexes")
     # First half is making pdb files
-    if not os.path.exists(pdb_id + "_%d_complex.pdb" % i) or not os.path.exists(pdb_id + "_%d_ag.pdb" % i):
+    starting_dir = os.getcwd()  # To not affect other programs get the starting dir
+    os.chdir("../pdbs/other_ab-ag_complexes/230220_CovAbDab_all")  # To shorten all the file names
+    # Only create pdbs if I haven't previously. Separate into ag alone and with ab
+    if not os.path.exists("Structs_For_BSA_Analysis/%s_%d_complex.pdb" % (pdb_id, i)) or not os.path.exists("Structs_For_BSA_Analysis/%s_%d_ag.pdb" % (pdb_id, i)):
         # Load full pdb
-        if os.path.exists("Structures/%s_imgt.pdb" % pdb_id):
-            cmd.load("Structures/%s_imgt.pdb" % pdb_id, object="full")
+        if os.path.exists("Downloaded_Structures/%s_imgt.pdb" % pdb_id):
+            cmd.load("Downloaded_Structures/%s_imgt.pdb" % pdb_id, object="full")
         else:
             cmd.fetch(pdb_id, type="pdb", name="full", file="temp.pdb")
             os.remove("temp.pdb")
 
         cmd.remove("solvent")
         # Save a file with the complex
-        cmd.save(pdb_id + "_%d_complex.pdb" % i, "chain %s+%s" % (ag_ch, ab_ch))
+        cmd.save("Structs_For_BSA_Analysis/%s_%d_complex.pdb" % (pdb_id, i), "chain %s+%s" % (ag_ch, ab_ch))
         # Save another file with just the antigen
-        cmd.save(pdb_id + "_%d_ag.pdb" % i, "chain " + ag_ch)
+        cmd.save("Structs_For_BSA_Analysis/%s_%d_ag.pdb" % (pdb_id, i), "chain " + ag_ch)
         cmd.reinitialize()
-    # Second half is making dssp files
-    if not os.path.exists("../../dssps/other_ab-ag_complexes/%s_%d_complex.dssp" % (pdb_id, i)) or not os.path.exists("../../dssps/other_ab-ag_complexes/%s_%d_ag.dssp" % (pdb_id, i)):
-        os.system("mkdssp -i %s -o %s" % (pdb_id + "_%d_complex.pdb" % i, "../../dssps/other_ab-ag_complexes/%s_%d_complex.dssp" % (pdb_id, i)))
-        os.system("mkdssp -i %s -o %s" % (pdb_id + "_%d_ag.pdb" % i, "../../dssps/other_ab-ag_complexes/%s_%d_ag.dssp" % (pdb_id, i)))
+
+        # Second half is making dssp files
+    os.chdir(r"C:\Users\clint\Box\IG Lab\Members\Clint Holt\Corona\54043-5\dssps\other_ab-ag_complexes")
+    # Create dssp files from the complex and the ag alone if I haven't already
+    if not os.path.exists("%s_%d_complex.dssp" % (pdb_id, i)) or not os.path.exists("%s_%d_ag.dssp" % (pdb_id, i)):
+        fin_comp = "../../pdbs/other_ab-ag_complexes/230220_CovAbDab_all/Structs_For_BSA_Analysis/%s_%d_complex.pdb" % (pdb_id, i)
+        fin_ag = "../../pdbs/other_ab-ag_complexes/230220_CovAbDab_all/Structs_For_BSA_Analysis/%s_%d_ag.pdb" % (pdb_id, i)
+
+        os.system("mkdssp -i %s -o %s" % (fin_comp, "%s_%d_complex.dssp" % (pdb_id, i)))  # Run the dssp program
+        os.system("mkdssp -i %s -o %s" % (fin_ag, "%s_%d_ag.dssp" % (pdb_id, i)))
+
+    os.chdir(starting_dir)
+
 
 def get_all_sabdab_bsas(sab_cov_df):
     # Loop over human abs first
@@ -451,3 +462,39 @@ def get_all_sabdab_bsas(sab_cov_df):
 
 def get_ep_res(bsa_list):
     return [(resn, aa, sasa) for resn, aa, sasa in bsa_list if int(sasa) > 0]
+
+
+def get_s2_ep_res(bsa_list):
+    s2_ep = []
+    for resn, aa, sasa in bsa_list:
+        if int(sasa) > 0 and int(resn) > 685:  # > 685
+            s2_ep.append((int(resn), int(sasa)))
+    return s2_ep
+
+
+def get_fasta_tuples(fasta_file):
+    """ Convert a given fasta file to tuples of (header, sequence).
+
+        Args:
+            fasta_file: str`
+                a file name for a FASTA file with '>' preceding each entry.
+        """
+    sequence_tuples = []
+    with open(fasta_file) as light_f:
+        for line in light_f.readlines():
+            line = line.replace('\n', '')
+            try:
+                if line[0] == '>':
+                    sequence_tuples.append(tuple(current_entry))
+                    current_entry = [line, '']
+                else:
+                    # If this raises an exception then the fasta file doesn't begin with a '>'
+                    current_entry[1] += line
+            # This catches the first loop through when current_entry doesn't exist
+            except NameError:
+                current_entry = [line, '']
+            except IndexError:  # Some files have empty lines and don't have index 0
+                pass
+
+    sequence_tuples.append(tuple(current_entry))  # Catches the last entry
+    return sequence_tuples
