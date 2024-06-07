@@ -51,6 +51,7 @@ def prep_human_covabdab(dab_fname: str, treat_paralogs_same=True):
         covdf (pandas.dataframe)
     """
     covdf = pd.read_csv(dab_fname)
+    
 
     covdf["Human"] = covdf["Heavy V Gene"].apply(is_human)
     covdf = covdf[covdf["Human"]]
@@ -59,9 +60,17 @@ def prep_human_covabdab(dab_fname: str, treat_paralogs_same=True):
         covdf["HV"] = covdf["Heavy V Gene"].apply(rename_paralogs)
         covdf["LV"] = covdf["Light V Gene"].apply(rename_paralogs)
 
-
     covdf = covdf[covdf["LV"].apply(lambda x: x != False)]
     covdf = covdf.dropna(subset=['HV', 'LV', 'CDRH3', 'CDRL3'])
+    covdf = covdf[covdf["HV"] != "ND"]
+    covdf = covdf[covdf["LV"] != "ND"]
+    covdf = covdf[covdf["CDRH3"] != "ND"]
+    covdf = covdf[covdf["CDRL3"] != "ND"]
+    # Drop duplicates if not "ND"
+    nd_subset = covdf[(covdf["VHorVHH"] == "ND") | (covdf["VL"] == "ND")]
+    covdf = covdf[(covdf["VHorVHH"] != "ND") & (covdf["VL"] != "ND")]
+    covdf.drop_duplicates(subset=['VHorVHH', 'VL'], inplace=True)
+    covdf = pd.concat([covdf, nd_subset])
 
     covdf = covdf.reset_index()
 
@@ -427,7 +436,7 @@ def make_structs_for_bsa_analysis(pdb_id, ag_ch, ab_ch, i):
 
 def get_all_sabdab_bsas(sab_cov_df):
     # Loop over human abs first
-    # Skipped 7l06 and 7l02 go back to that
+    # Skipped 7l06 and 7l02 because these have issues
     all_bsa_values = []
     for i in range(len(sab_cov_df)):
         # Scrape excel data from one row
