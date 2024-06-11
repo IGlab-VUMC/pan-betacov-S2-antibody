@@ -26,7 +26,7 @@ Clinton Holt at clinton.m.holt@vanderbilt.edu is the repo author.
 - You could just go through the jupyter notebook and uncomment the lines meant to download packages (to do this I'd recommend python 3.8) otherwise you can use the environment.yml or requirements.txt files as described below.
 
 ## Using Conda (Recommended)
-1. **Clone the repository"**
+1. **Clone the repository**
 ```bash
 git clone https://github.com/IGlab-VUMC/pan-betacov-S2-antibody.git
 cd pan-betacov-S2-antibody
